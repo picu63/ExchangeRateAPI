@@ -9,8 +9,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using System.Xml.XPath;
+using Microsoft.EntityFrameworkCore;
+using ExchangeRateAPI.Data;
 
 namespace ExchangeRateAPI
 {
@@ -23,7 +28,6 @@ namespace ExchangeRateAPI
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
 
@@ -32,9 +36,11 @@ namespace ExchangeRateAPI
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "ExchangeRateAPI", Version = "v1" });
             });
+
+            services.AddDbContext<ExchangeRateAPIContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("ExchangeRateAPIContext")));
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
