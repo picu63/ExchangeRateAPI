@@ -37,17 +37,16 @@ namespace ExchangeRateAPI
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "ExchangeRateAPI", Version = "v1" });
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
             });
 
             services.AddDbContext<ExchangeRateAPIContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("ExchangeRateAPIContext")));
-            //services.AddSingleton<Currency>(provider =>
-            //{
-            //    var baseCurrencyCode = Configuration.GetSection("BaseCurrency").Value;
-            //    return new Currency(baseCurrencyCode);
-            //});
 
-            //services.AddSingleton<IExchangeRateProvider, NbpRateProvider>();
+            services.AddSingleton<IExchangeRateProvider, NbpRateProvider>();
+            services.AddSingleton<ICurrencyConverter, CurrencyConverter>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

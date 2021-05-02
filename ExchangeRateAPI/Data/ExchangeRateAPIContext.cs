@@ -15,8 +15,11 @@ namespace ExchangeRateAPI.Data
             Database.EnsureCreated();
         }
 
+        /// <summary>
+        /// TODO Zastanowić się nad wpisaniem na sztywno danych listy dostepnych walut
+        /// </summary>
         public DbSet<ExchangeRateAPI.Models.Currency> Currencies { get; set; }
 
-        public DbSet<ExchangeRateAPI.Models.ExchangeRate> ExchangeRates { get; set; }
+        //public DbSet<ExchangeRateAPI.Models.ExchangeRate> ExchangeRates { get; set; }
     }
 }

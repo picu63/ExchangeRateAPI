@@ -1,10 +1,11 @@
 ﻿
+using System;
 using ExchangeRateAPI.Models;
 
 namespace ExchangeRateAPI.Interfaces
 {
-    public interface ICurrencyConverter<TAmount>
+    public interface ICurrencyConverter
     {
-        TAmount Convert(TAmount fromAmount, Currency fromCurrency, Currency toCurrency);
+        decimal Convert(decimal fromAmount, Currency fromCurrency, Currency toCurrency);
     }
 }

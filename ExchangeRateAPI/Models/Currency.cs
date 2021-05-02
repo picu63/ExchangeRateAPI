@@ -25,5 +25,9 @@ namespace ExchangeRateAPI.Models
         public long Id { get; set; }
         public string Name { get; set; }
         public string Code { get; set; }
+        public override string ToString()
+        {
+            return Code + ((string.IsNullOrWhiteSpace(Name)) ? string.Empty : $" ({Name})");
+        }
     }
 }

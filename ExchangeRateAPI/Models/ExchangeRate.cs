@@ -7,8 +7,7 @@ namespace ExchangeRateAPI.Models
 {
     public class ExchangeRate
     {
-        public long Id { get; set; }
-        public decimal Amount { get; set; }
+        public decimal AmountFrom { get; set; }
         public string CurrencyFrom { get; set; }
         public string CurrencyTo { get; set; }
     }

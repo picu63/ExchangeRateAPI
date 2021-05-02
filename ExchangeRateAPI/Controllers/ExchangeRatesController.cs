@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using ExchangeRateAPI.Data;
 using ExchangeRateAPI.Interfaces;
 using ExchangeRateAPI.Models;
+using Microsoft.Extensions.Logging;
 
 namespace ExchangeRateAPI.Controllers
 {
@@ -16,24 +17,52 @@ namespace ExchangeRateAPI.Controllers
     public class ExchangeRatesController : ControllerBase
     {
         private readonly ExchangeRateAPIContext _context;
-        private readonly Currency _baseCurrency;
+        private readonly ILogger<ExchangeRatesController> _logger;
         private readonly IExchangeRateProvider _exchangeRateProvider;
+        private readonly ICurrencyConverter _currencyConverter;
 
-        public ExchangeRatesController(ExchangeRateAPIContext context, Currency baseCurrency, IExchangeRateProvider exchangeRateProvider)
+        public ExchangeRatesController(ExchangeRateAPIContext context, ILogger<ExchangeRatesController> logger, IExchangeRateProvider exchangeRateProvider, ICurrencyConverter currencyConverter)
         {
             _context = context;
-            _baseCurrency = baseCurrency;
+            _logger = logger;
             _exchangeRateProvider = exchangeRateProvider;
+            _currencyConverter = currencyConverter;
         }
 
         // GET: api/ExchangeRates
-        [HttpPost]
-        public async Task<ActionResult<decimal>> GetExchangeRate(ExchangeRate exchangeRate)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///     
+        ///     {
+        ///         "amountFrom": 200,
+        ///         "currencyFrom":"USD",
+        ///         "currencyTo":"PLN"
+        ///     }
+        /// </remarks>
+        /// <param name="exchangeRate"></param>
+        /// <returns></returns>
+        [HttpPost("converter")]
+        public async Task<ActionResult<decimal>> ConvertCurrency(ExchangeRate exchangeRate)
         {
-            ICurrencyConverter<decimal> currencyConverter = new CurrencyConverter(_exchangeRateProvider);
-            var result = currencyConverter.Convert(exchangeRate.Amount, new Currency(exchangeRate.CurrencyFrom),
-                new Currency(exchangeRate.CurrencyTo));
-            return result;
+            var currencyCodes = _context.Currencies.Select(c => c.Code);
+
+            if (!currencyCodes.Contains(exchangeRate.CurrencyFrom))
+            {
+                return NotFound(
+                    $"Currency code \"{exchangeRate.CurrencyFrom}\" not found in available curriences");
+            } 
+
+            if (!currencyCodes.Contains(exchangeRate.CurrencyTo))
+            {
+                return NotFound(
+                    $"Currency code \"{exchangeRate.CurrencyTo}\" not found in available curriences");
+            }
+
+            return await Task.Run(()=> _currencyConverter.Convert(exchangeRate.AmountFrom, new Currency(exchangeRate.CurrencyFrom),
+                new Currency(exchangeRate.CurrencyTo)));
         }
 
         [HttpGet("available")]

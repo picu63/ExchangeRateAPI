@@ -1,26 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
+using System.Xml;
 using ExchangeRateAPI.Interfaces;
 using ExchangeRateAPI.Models;
-using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace ExchangeRateAPI
 {
     public class NbpRateProvider : IExchangeRateProvider
     {
+        private readonly ILogger<NbpRateProvider> _logger;
         private readonly HttpClient _client = new();
-        private const string NbpBaseApiAddress = "http://api.nbp.pl/";
+        private readonly Uri _nbpBaseApiAddress = new("http://api.nbp.pl/");
         private const string TableType = "A";
 
-        public NbpRateProvider()
+        public NbpRateProvider(ILogger<NbpRateProvider> logger)
         {
+            _logger = logger;
             BaseCurrency = new Currency("PLN", "Złoty");
-            _client.BaseAddress = new Uri(NbpBaseApiAddress);
+            _client.BaseAddress = _nbpBaseApiAddress;
             _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json"));
@@ -29,17 +31,18 @@ namespace ExchangeRateAPI
         public Currency BaseCurrency { get; }
         public decimal GetExchangeRate(Currency currency)
         {
-            var json = GetResponseContentAsync(new Uri($"api/exchangerates/rates/{TableType}/{currency.Code}/?format=json")).Result;
-            var amountPLNValue = JArray.Parse(json)[0]["rates"]["mid"].Value<decimal>();
-            return amountPLNValue;
-        }
-
-        private async Task<string> GetResponseContentAsync(Uri uri)
-        {
-            var response = await _client.GetAsync(uri);
-            if (!response.IsSuccessStatusCode) throw new HttpListenerException((int) response.StatusCode);
-            var json = await response.Content.ReadAsStringAsync();
-            return json;
+            if (currency is null) throw new ArgumentNullException(nameof(currency));
+            var uri = new Uri(_nbpBaseApiAddress, $"api/exchangerates/rates/{TableType}/{currency.Code}/?format=xml");
+            _logger.LogInformation($"Downloading xml from {uri}...");
+            var responseContent = new WebClient().DownloadString(uri);
+            var document = new XmlDocument();
+            document.LoadXml(responseContent);
+            var midElement = document["ExchangeRatesSeries"]?["Rates"]?["Rate"]?["Mid"];
+            return decimal.Parse(
+                !string.IsNullOrWhiteSpace(midElement?.InnerText) ? 
+                                            midElement.InnerText : 
+                                            throw new FormatException("Cannot parse exchange rate from api NBP."), 
+                new NumberFormatInfo(){NumberDecimalSeparator = "."});
         }
     }
 }
