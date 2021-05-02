@@ -16,6 +16,8 @@ using System.Threading.Tasks;
 using System.Xml.XPath;
 using Microsoft.EntityFrameworkCore;
 using ExchangeRateAPI.Data;
+using ExchangeRateAPI.Interfaces;
+using ExchangeRateAPI.Models;
 
 namespace ExchangeRateAPI
 {
@@ -39,6 +41,13 @@ namespace ExchangeRateAPI
 
             services.AddDbContext<ExchangeRateAPIContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("ExchangeRateAPIContext")));
+            //services.AddSingleton<Currency>(provider =>
+            //{
+            //    var baseCurrencyCode = Configuration.GetSection("BaseCurrency").Value;
+            //    return new Currency(baseCurrencyCode);
+            //});
+
+            //services.AddSingleton<IExchangeRateProvider, NbpRateProvider>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

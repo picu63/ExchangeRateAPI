@@ -16,5 +16,7 @@ namespace ExchangeRateAPI.Data
         }
 
         public DbSet<ExchangeRateAPI.Models.Currency> Currencies { get; set; }
+
+        public DbSet<ExchangeRateAPI.Models.ExchangeRate> ExchangeRates { get; set; }
     }
 }
