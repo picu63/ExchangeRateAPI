@@ -13,13 +13,35 @@ namespace ExchangeRateAPI.Data
             : base(options)
         {
             Database.EnsureCreated();
+            AddInitDefaultValues();
+        }
+
+        private void AddInitDefaultValues()
+        {
+            var initialCurrencies = new List<Currency>()
+            {
+                new("USD", "dolar amerykański"),
+                new("EUR", "euro"),
+                new("CHF", "frank szwajcarski"),
+                new("GBP", "funt szterling"),
+                new("JPY", "jen"),
+                new("HUF", "forint"),
+                new("CZK", "korona czeska"),
+            };
+            foreach (var initialCurrency in initialCurrencies
+                                            .Where(initialCurrency => !Currencies.Select(c => c.Code)
+                                                                        .Contains(initialCurrency.Code)))
+            {
+                Currencies.Add(initialCurrency);
+            }
+            SaveChanges();
         }
 
         /// <summary>
-        /// TODO Zastanowić się nad wpisaniem na sztywno danych listy dostepnych walut
+        /// Currencies 
         /// </summary>
-        public DbSet<ExchangeRateAPI.Models.Currency> Currencies { get; set; }
+        public DbSet<Currency> Currencies { get; set; }
 
-        //public DbSet<ExchangeRateAPI.Models.ExchangeRate> ExchangeRates { get; set; }
+        public DbSet<RequestItem> RequestItems { get; set; }
     }
 }

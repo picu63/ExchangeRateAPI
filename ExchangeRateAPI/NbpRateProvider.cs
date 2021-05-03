@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Xml;
+using ExchangeRateAPI.Data;
 using ExchangeRateAPI.Interfaces;
 using ExchangeRateAPI.Models;
 using Microsoft.Extensions.Logging;
@@ -14,13 +15,15 @@ namespace ExchangeRateAPI
     public class NbpRateProvider : IExchangeRateProvider
     {
         private readonly ILogger<NbpRateProvider> _logger;
+        private readonly ExchangeRateAPIContext _context;
         private readonly HttpClient _client = new();
         private readonly Uri _nbpBaseApiAddress = new("http://api.nbp.pl/");
         private const string TableType = "A";
 
-        public NbpRateProvider(ILogger<NbpRateProvider> logger)
+        public NbpRateProvider(ILogger<NbpRateProvider> logger, ExchangeRateAPIContext context)
         {
             _logger = logger;
+            _context = context;
             BaseCurrency = new Currency("PLN", "Złoty");
             _client.BaseAddress = _nbpBaseApiAddress;
             _client.DefaultRequestHeaders.Accept.Clear();
@@ -33,7 +36,15 @@ namespace ExchangeRateAPI
         {
             if (currency is null) throw new ArgumentNullException(nameof(currency));
             var uri = new Uri(_nbpBaseApiAddress, $"api/exchangerates/rates/{TableType}/{currency.Code}/?format=xml");
-            _logger.LogInformation($"Downloading xml from {uri}...");
+
+            _context.RequestItems.Add(new RequestItem()
+            {
+                Url = uri.ToString(), DateTime = DateTime.Now, Method = "GET",
+                Description = "Getting currency rate of PLN from Nbp API"
+            });
+
+            _logger.LogInformation($"Getting response from {uri}...");
+
             var responseContent = new WebClient().DownloadString(uri);
             var document = new XmlDocument();
             document.LoadXml(responseContent);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
 namespace ExchangeRateAPI.Models
@@ -22,12 +23,12 @@ namespace ExchangeRateAPI.Models
                 throw new ArgumentException("Cannot be null or empty", nameof(code));
             Name = name;
         }
-        public long Id { get; set; }
-        public string Name { get; set; }
+        [Key]
         public string Code { get; set; }
-        public override string ToString()
-        {
-            return Code + ((string.IsNullOrWhiteSpace(Name)) ? string.Empty : $" ({Name})");
-        }
+        public string Name { get; set; }
+        //public override string ToString()
+        //{
+        //    return Code + ((string.IsNullOrWhiteSpace(Name)) ? string.Empty : $" ({Name})");
+        //}
     }
 }
