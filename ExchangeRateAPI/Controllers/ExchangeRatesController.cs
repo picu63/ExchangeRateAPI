@@ -42,8 +42,8 @@ namespace ExchangeRateAPI.Controllers
             try
             {
                 _logger.LogInformation($"Converting given amount of currency to provided currency: {exchangeRate}");
-                SaveRequest($"Converting: {exchangeRate}");
-                var currencyCodes = _context.Currencies.Select(c => c.Code);
+                await SaveRequest($"Converting: {exchangeRate}");
+                var currencyCodes = _context.Currencies.Select(c => c.Code).ToList();
 
                 if (!currencyCodes.Contains(exchangeRate.CurrencyFrom))
                     return NotFound(
@@ -72,7 +72,7 @@ namespace ExchangeRateAPI.Controllers
         {
             try
             {
-                SaveRequest("Getting available curriences");
+                await SaveRequest("Getting available curriences");
                 return await _context.Currencies.Select(c => new { c.Code, c.Name }).ToListAsync();
             }
             catch (Exception ex)
@@ -85,7 +85,7 @@ namespace ExchangeRateAPI.Controllers
         /// Writes the query to the database as intended.
         /// </summary>
         /// <param name="description"></param>
-        private async void SaveRequest(string description = "")
+        private async Task SaveRequest(string description = "")
         {
             _logger.LogInformation("Saving request to database.");
             var method = Request.Method;

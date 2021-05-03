@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ExchangeRateAPI.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using ExchangeRateAPI.Models;
 
