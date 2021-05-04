@@ -45,7 +45,7 @@ namespace ExchangeRateAPI.Controllers
             {
                 _logger.LogInformation($"Converting given amount of currency to provided currency: {exchangeRate}");
                 Request.EnableBuffering();
-                await SaveRequest(Request, $"Converting: {exchangeRate}");
+                await SaveRequest($"Converting: {exchangeRate}");
                 var currencyCodes = _context.Currencies.Select(c => c.Code).ToList();
 
                 if (!currencyCodes.Contains(exchangeRate.CurrencyFrom))
@@ -76,7 +76,7 @@ namespace ExchangeRateAPI.Controllers
             try
             {
                 Request.EnableBuffering();
-                await SaveRequest(Request, "Getting available curriences");
+                await SaveRequest("Getting available curriences");
                 return await _context.Currencies.Select(c => new { c.Code, c.Name }).ToListAsync();
             }
             catch (Exception ex)
@@ -89,7 +89,7 @@ namespace ExchangeRateAPI.Controllers
         /// Writes the request to the database as intended.
         /// </summary>
         /// <param name="description"></param>
-        private async Task SaveRequest(HttpRequest request, string description = "")
+        private async Task SaveRequest(string description = "")
         {
             _logger.LogInformation("Saving request to database.");
 
@@ -101,8 +101,8 @@ namespace ExchangeRateAPI.Controllers
             {
                 headers += requestHeader.ToString();
             }
-            var method = request.Method;
-            var url = request.GetDisplayUrl();
+            var method = Request.Method;
+            var url = Request.GetDisplayUrl();
             await _context.RequestItems.AddAsync(new RequestItem()
                 {Method = method, Url = url, DateTime = DateTime.Now, Description = description, Body = body, Headers = headers});
             await _context.SaveChangesAsync();
