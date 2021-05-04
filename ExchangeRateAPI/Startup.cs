@@ -18,6 +18,7 @@ using Microsoft.EntityFrameworkCore;
 using ExchangeRateAPI.Data;
 using ExchangeRateAPI.Interfaces;
 using ExchangeRateAPI.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace ExchangeRateAPI
 {
@@ -57,6 +58,13 @@ namespace ExchangeRateAPI
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ExchangeRateAPI v1"));
             }
+
+            // Enabling opportunity to read body from request
+            app.Use((context, next) =>
+            {
+                context.Request.EnableBuffering();
+                return next();
+            });
 
             app.UseHttpsRedirection();
 

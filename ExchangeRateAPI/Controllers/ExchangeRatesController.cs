@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipelines;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -13,6 +14,7 @@ using ExchangeRateAPI.Interfaces;
 using ExchangeRateAPI.Models;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 
 namespace ExchangeRateAPI.Controllers
 {
@@ -42,7 +44,8 @@ namespace ExchangeRateAPI.Controllers
             try
             {
                 _logger.LogInformation($"Converting given amount of currency to provided currency: {exchangeRate}");
-                await SaveRequest($"Converting: {exchangeRate}");
+                Request.EnableBuffering();
+                await SaveRequest(Request, $"Converting: {exchangeRate}");
                 var currencyCodes = _context.Currencies.Select(c => c.Code).ToList();
 
                 if (!currencyCodes.Contains(exchangeRate.CurrencyFrom))
@@ -72,7 +75,8 @@ namespace ExchangeRateAPI.Controllers
         {
             try
             {
-                await SaveRequest("Getting available curriences");
+                Request.EnableBuffering();
+                await SaveRequest(Request, "Getting available curriences");
                 return await _context.Currencies.Select(c => new { c.Code, c.Name }).ToListAsync();
             }
             catch (Exception ex)
@@ -82,23 +86,25 @@ namespace ExchangeRateAPI.Controllers
             }
         }
         /// <summary>
-        /// Writes the query to the database as intended.
+        /// Writes the request to the database as intended.
         /// </summary>
         /// <param name="description"></param>
-        private async Task SaveRequest(string description = "")
+        private async Task SaveRequest(HttpRequest request, string description = "")
         {
             _logger.LogInformation("Saving request to database.");
-            var method = Request.Method;
-            Request.EnableBuffering();
-            //To read the request stream first creating a new byte[] with the same length as the request stream.
-            var buffer = new byte[Convert.ToInt32(Request.ContentLength)];
-            //Copy the entire request stream into the new buffer.
-            await Request.Body.ReadAsync(buffer, 0, buffer.Length);
-            //Coverting the byte[] into a string using UTF8 encoding to get string body.
-            var body = Encoding.UTF8.GetString(buffer);
-            var url = Request.GetDisplayUrl();
+
+            Request.Body.Position = 0;
+            StreamReader sr = new StreamReader(Request.Body);
+            var body = await sr.ReadToEndAsync();
+            string headers = string.Empty;
+            foreach (var requestHeader in Request.Headers)
+            {
+                headers += requestHeader.ToString();
+            }
+            var method = request.Method;
+            var url = request.GetDisplayUrl();
             await _context.RequestItems.AddAsync(new RequestItem()
-                {Method = method, Url = url, DateTime = DateTime.Now, Description = description, Body = body});
+                {Method = method, Url = url, DateTime = DateTime.Now, Description = description, Body = body, Headers = headers});
             await _context.SaveChangesAsync();
         }
     }

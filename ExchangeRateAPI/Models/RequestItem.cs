@@ -15,5 +15,6 @@ namespace ExchangeRateAPI.Models
         public string Url { get; set; }
         public string Description { get; set; }
         public string Body { get; set; }
+        public string Headers { get; set; }
     }
 }
