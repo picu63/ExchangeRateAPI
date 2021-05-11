@@ -56,8 +56,8 @@ namespace ExchangeRateAPI.Controllers
                     return NotFound(
                         $"Currency code \"{exchangeRate.CurrencyTo}\" not found in available curriences");
 
-                return await Task.Run(() => _currencyConverter.Convert(exchangeRate.AmountFrom, new Currency(exchangeRate.CurrencyFrom),
-                    new Currency(exchangeRate.CurrencyTo)));
+                return await _currencyConverter.Convert(exchangeRate.AmountFrom, new Currency(exchangeRate.CurrencyFrom),
+                    new Currency(exchangeRate.CurrencyTo));
             }
             catch (Exception ex)
             {

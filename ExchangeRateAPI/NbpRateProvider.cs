@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Xml;
 using ExchangeRateAPI.Data;
 using ExchangeRateAPI.Interfaces;
@@ -32,20 +33,13 @@ namespace ExchangeRateAPI
         }
 
         public Currency BaseCurrency { get; }
-        public decimal GetExchangeRate(Currency currency)
+        public async Task<decimal> GetExchangeRate(Currency currency)
         {
             if (currency is null) throw new ArgumentNullException(nameof(currency));
             var uri = new Uri(_nbpBaseApiAddress, $"api/exchangerates/rates/{TableType}/{currency.Code}/?format=xml");
-
-            //_context.RequestItems.Add(new RequestItem()
-            //{
-            //    Url = uri.ToString(), DateTime = DateTime.Now, Method = "GET",
-            //    Description = "Getting currency rate of PLN from Nbp API"
-            //});
-
             _logger.LogInformation($"Getting response from {uri}...");
-
-            var responseContent = new WebClient().DownloadString(uri);
+            var response = await new HttpClient().GetAsync(uri);
+            var responseContent = await response.Content.ReadAsStringAsync();
             var document = new XmlDocument();
             document.LoadXml(responseContent);
             var midElement = document["ExchangeRatesSeries"]?["Rates"]?["Rate"]?["Mid"];

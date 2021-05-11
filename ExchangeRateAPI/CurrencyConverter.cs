@@ -27,7 +27,7 @@ namespace ExchangeRateAPI
             _exchangeRateProvider = exchangeRateProvider;
         }
 
-        public decimal Convert(decimal fromAmount, Currency fromCurrency, Currency toCurrency)
+        public async Task<decimal> Convert(decimal fromAmount, Currency fromCurrency, Currency toCurrency)
         {
             try
             {
@@ -35,8 +35,8 @@ namespace ExchangeRateAPI
                 if (fromCurrency is null) throw new ArgumentNullException(nameof(fromCurrency));
                 if (toCurrency is null) throw new ArgumentNullException(nameof(toCurrency));
                 _logger.LogInformation($"Converting {fromAmount} {fromCurrency.Code} to {toCurrency.Code}.");
-                var fromToBaseAmount = fromAmount * _exchangeRateProvider.GetExchangeRate(fromCurrency);
-                return fromToBaseAmount / _exchangeRateProvider.GetExchangeRate(toCurrency);
+                var fromToBaseAmount = fromAmount * await _exchangeRateProvider.GetExchangeRate(fromCurrency);
+                return fromToBaseAmount / await _exchangeRateProvider.GetExchangeRate(toCurrency);
             }
             catch (Exception ex)
             {
