@@ -46,8 +46,8 @@ namespace ExchangeRateAPI
             services.AddDbContext<ExchangeRateAPIContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("ExchangeRateAPIContext")));
 
-            services.AddSingleton<IExchangeRateProvider, NbpRateProvider>();
-            services.AddSingleton<ICurrencyConverter, CurrencyConverter>();
+            services.AddScoped<IExchangeRateProvider, NbpRateProvider>();
+            services.AddScoped<ICurrencyConverter, CurrencyConverter>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
