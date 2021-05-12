@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using ExchangeRateAPI.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using ExchangeRateAPI.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace ExchangeRateAPI.Data
 {
@@ -43,6 +44,6 @@ namespace ExchangeRateAPI.Data
         /// </summary>
         public DbSet<Currency> Currencies { get; set; }
 
-        public DbSet<RequestItem> RequestItems { get; set; }
+        public DbSet<RequestResponseItem> RequestResponseItems { get; set; }
     }
 }

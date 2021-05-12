@@ -65,6 +65,7 @@ namespace ExchangeRateAPI
                 context.Request.EnableBuffering();
                 return next();
             });
+            app.UseMiddleware<RestLoggingMiddleware>();
 
             app.UseHttpsRedirection();
 

@@ -45,7 +45,6 @@ namespace ExchangeRateAPI.Controllers
             {
                 _logger.LogInformation($"Converting given amount of currency to provided currency: {exchangeRate}");
                 Request.EnableBuffering();
-                await SaveRequest($"Converting: {exchangeRate}");
                 var currencyCodes = _context.Currencies.Select(c => c.Code).ToList();
 
                 if (!currencyCodes.Contains(exchangeRate.CurrencyFrom))
@@ -76,7 +75,6 @@ namespace ExchangeRateAPI.Controllers
             try
             {
                 Request.EnableBuffering();
-                await SaveRequest("Getting available curriences");
                 return await _context.Currencies.Select(c => new { c.Code, c.Name }).ToListAsync();
             }
             catch (Exception ex)
@@ -84,28 +82,6 @@ namespace ExchangeRateAPI.Controllers
                 _logger.LogError(ex, "Error in getting available curriences");
                 throw;
             }
-        }
-        /// <summary>
-        /// Writes the request to the database as intended.
-        /// </summary>
-        /// <param name="description"></param>
-        private async Task SaveRequest(string description = "")
-        {
-            _logger.LogInformation("Saving request to database.");
-
-            Request.Body.Position = 0;
-            StreamReader sr = new StreamReader(Request.Body);
-            var body = await sr.ReadToEndAsync();
-            string headers = string.Empty;
-            foreach (var requestHeader in Request.Headers)
-            {
-                headers += requestHeader.ToString();
-            }
-            var method = Request.Method;
-            var url = Request.GetDisplayUrl();
-            await _context.RequestItems.AddAsync(new RequestItem()
-                {Method = method, Url = url, DateTime = DateTime.Now, Description = description, Body = body, Headers = headers});
-            await _context.SaveChangesAsync();
         }
     }
 }
