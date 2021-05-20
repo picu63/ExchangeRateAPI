@@ -44,7 +44,6 @@ namespace ExchangeRateAPI.Controllers
             try
             {
                 _logger.LogInformation($"Converting given amount of currency to provided currency: {exchangeRate}");
-                Request.EnableBuffering();
                 var currencyCodes = _context.Currencies.Select(c => c.Code).ToList();
 
                 if (!currencyCodes.Contains(exchangeRate.CurrencyFrom))
@@ -74,7 +73,6 @@ namespace ExchangeRateAPI.Controllers
         {
             try
             {
-                Request.EnableBuffering();
                 return await _context.Currencies.Select(c => new { c.Code, c.Name }).ToListAsync();
             }
             catch (Exception ex)

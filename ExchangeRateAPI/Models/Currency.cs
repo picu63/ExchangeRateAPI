@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
@@ -26,9 +28,11 @@ namespace ExchangeRateAPI.Models
         [Key]
         public string Code { get; set; }
         public string Name { get; set; }
-        //public override string ToString()
-        //{
-        //    return Code + ((string.IsNullOrWhiteSpace(Name)) ? string.Empty : $" ({Name})");
-        //}
+        public override string ToString()
+        {
+            if(!string.IsNullOrWhiteSpace(Name))
+                return Code + $" ({Name})";
+            return Code;
+        }
     }
 }
