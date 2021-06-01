@@ -1,17 +1,13 @@
 ﻿using System;
-using System.Buffers;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using ExchangeRateAPI.Data;
 using ExchangeRateAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace ExchangeRateAPI
+namespace ExchangeRateAPI.Middlewares
 {
     public class RestLoggingMiddleware
     {

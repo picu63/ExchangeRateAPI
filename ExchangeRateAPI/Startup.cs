@@ -18,6 +18,7 @@ using Microsoft.EntityFrameworkCore;
 using ExchangeRateAPI.Data;
 using ExchangeRateAPI.Filters;
 using ExchangeRateAPI.Interfaces;
+using ExchangeRateAPI.Middlewares;
 using ExchangeRateAPI.Models;
 using Microsoft.AspNetCore.Http;
 
@@ -34,7 +35,7 @@ namespace ExchangeRateAPI
 
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.Configure<Currency>(Configuration.GetSection("MainCurrency"));
             services.AddControllers(o=>o.Filters.Add<JsonExceptionFilter>());
             services.AddSwaggerGen(c =>
             {

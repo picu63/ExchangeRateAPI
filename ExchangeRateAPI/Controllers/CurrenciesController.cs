@@ -7,16 +7,19 @@ using ExchangeRateAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ExchangeRateAPI.Controllers
 {
     public class CurrenciesController : ControllerBase
     {
         private readonly ExchangeRateAPIContext _dbContext;
+        private readonly IOptions<Currency> _mainCurrencyWrapper;
 
-        public CurrenciesController(ILogger<CurrenciesController> logger, ExchangeRateAPIContext dbContext)
+        public CurrenciesController(ILogger<CurrenciesController> logger, ExchangeRateAPIContext dbContext, IOptions<Currency> mainCurrencyWrapper)
         {
             _dbContext = dbContext;
+            _mainCurrencyWrapper = mainCurrencyWrapper;
         }
 
         /// <summary>
@@ -51,6 +54,12 @@ namespace ExchangeRateAPI.Controllers
             _dbContext.Currencies.Remove(new Currency(code));
             await _dbContext.SaveChangesAsync();
             return Ok();
+        }
+
+        [HttpGet("currencies/main")]
+        public ActionResult<Currency> GetMainCurrency()
+        {
+            return _mainCurrencyWrapper.Value;
         }
     }
 }

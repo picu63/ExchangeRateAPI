@@ -12,6 +12,7 @@ using ExchangeRateAPI.Interfaces;
 using ExchangeRateAPI.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ExchangeRateAPI
 {
@@ -22,10 +23,10 @@ namespace ExchangeRateAPI
         private readonly Uri _nbpBaseApiAddress = new("http://api.nbp.pl/");
         private const string TableType = "A";
 
-        public NbpRateProvider(ILogger<NbpRateProvider> logger)
+        public NbpRateProvider(ILogger<NbpRateProvider> logger, IOptions<Currency> mainCurrencyOptions)
         {
             _logger = logger;
-            BaseCurrency = new Currency("PLN", "Złoty");
+            BaseCurrency = new Currency(mainCurrencyOptions.Value.Code, mainCurrencyOptions.Value.Name);
             _client.BaseAddress = _nbpBaseApiAddress;
             _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Accept.Add(
