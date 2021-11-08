@@ -9,29 +9,31 @@ using Microsoft.Extensions.Logging;
 
 namespace ExchangeRateAPI.Middlewares
 {
-    public class RestLoggingMiddleware
+    public class RestLoggingMiddleware : IMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ExchangeRateAPIContext _exchangeRateApiContext;
         private readonly ILogger _logger;
 
-        public RestLoggingMiddleware(RequestDelegate next, ILogger<RestLoggingMiddleware> logger)
+        public RestLoggingMiddleware(RequestDelegate next, ILogger<RestLoggingMiddleware> logger, ExchangeRateAPIContext exchangeRateApiContext)
         {
             _next = next;
             _logger = logger;
+            _exchangeRateApiContext = exchangeRateApiContext;
         }
 
         /// <summary>
         /// Writes the request to the database as intended.
         /// </summary>
-        private async Task SaveContextOperation(HttpContext httpContext, ExchangeRateAPIContext exchangeRateApiContext)
+        private async Task SaveContextOperation(HttpContext httpContext)
         {
             try
             {
                 var requestItem = await GetRequestItem(httpContext.Request);
                 var responseItem = await GetResponseItem(httpContext.Response);
-                await exchangeRateApiContext.RequestResponseItems.AddAsync(new RequestResponseItem()
+                await _exchangeRateApiContext.RequestResponseItems.AddAsync(new RequestResponseItem()
                 { Request = requestItem, Response = responseItem });
-                await exchangeRateApiContext.SaveChangesAsync();
+                await _exchangeRateApiContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -77,15 +79,15 @@ namespace ExchangeRateAPI.Middlewares
             return requestItem;
         }
 
-        public async Task InvokeAsync(HttpContext context, ExchangeRateAPIContext dbContext)
+        public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
             try
             {
-                await _next(context);
+                await next(context);
             }
             finally
             {
-                await SaveContextOperation(context, dbContext);
+                await SaveContextOperation(context);
             }
         }
     }
